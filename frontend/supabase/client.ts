@@ -2,7 +2,7 @@ import { AppState, Platform } from 'react-native'
 import 'react-native-url-polyfill/auto'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { createClient, processLock } from '@supabase/supabase-js'
-import { ENV } from '@/src/constants/Env'
+import { ENV } from '@/src/constants/env'
 import { Database } from './types/supabase.data.types'
 
 const supabaseUrl = ENV.supabaseUrl

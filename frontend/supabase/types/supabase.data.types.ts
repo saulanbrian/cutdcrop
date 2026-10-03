@@ -1,10 +1,4 @@
-[?25l[?2004h
-                                                                                                   
-  >  1. ticdfmhcigafedoswpgr [name: cutdcrop2.0, org: btxnyqhbgyqfzzfpfruq, region: ap-southeast-1]
-                                                                                                   
-                                                                                                   
-    ↑/k up • ↓/j down • / filter • q quit • ? more                                                 
-                                                                                                   [6A [J[2K[?2004l[?25h[?1002l[?1003l[?1006lexport type Json =
+export type Json =
   | string
   | number
   | boolean
@@ -16,10 +10,100 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "13.0.5"
+    PostgrestVersion: "14.5"
+  }
+  graphql_public: {
+    Tables: {
+      [_ in never]: never
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      graphql: {
+        Args: {
+          extensions?: Json
+          operationName?: string
+          query?: string
+          variables?: Json
+        }
+        Returns: Json
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
   }
   public: {
     Tables: {
+      answers: {
+        Row: {
+          answered_at: string
+          id: string
+          option_id: string
+          response_id: string | null
+        }
+        Insert: {
+          answered_at?: string
+          id?: string
+          option_id: string
+          response_id?: string | null
+        }
+        Update: {
+          answered_at?: string
+          id?: string
+          option_id?: string
+          response_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "answers_option_id_fkey"
+            columns: ["option_id"]
+            isOneToOne: false
+            referencedRelation: "options"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "answers_response_id_fkey"
+            columns: ["response_id"]
+            isOneToOne: false
+            referencedRelation: "responses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      options: {
+        Row: {
+          id: string
+          is_correct: boolean
+          question_id: string
+          value: string
+        }
+        Insert: {
+          id?: string
+          is_correct?: boolean
+          question_id: string
+          value: string
+        }
+        Update: {
+          id?: string
+          is_correct?: boolean
+          question_id?: string
+          value?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "options_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "questions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -38,13 +122,44 @@ export type Database = {
         }
         Relationships: []
       }
+      questions: {
+        Row: {
+          id: string
+          position: number
+          quiz_id: string
+          text: string
+          type: Database["public"]["Enums"]["question_type"]
+        }
+        Insert: {
+          id?: string
+          position: number
+          quiz_id: string
+          text: string
+          type: Database["public"]["Enums"]["question_type"]
+        }
+        Update: {
+          id?: string
+          position?: number
+          quiz_id?: string
+          text?: string
+          type?: Database["public"]["Enums"]["question_type"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "questions_quiz_id_fkey"
+            columns: ["quiz_id"]
+            isOneToOne: false
+            referencedRelation: "quizzes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       quizzes: {
         Row: {
           content: Json | null
           created_at: string | null
           id: string
           ref: string
-          score: number | null
           status: Database["public"]["Enums"]["quiz_status"]
         }
         Insert: {
@@ -52,7 +167,6 @@ export type Database = {
           created_at?: string | null
           id?: string
           ref: string
-          score?: number | null
           status?: Database["public"]["Enums"]["quiz_status"]
         }
         Update: {
@@ -60,7 +174,6 @@ export type Database = {
           created_at?: string | null
           id?: string
           ref?: string
-          score?: number | null
           status?: Database["public"]["Enums"]["quiz_status"]
         }
         Relationships: [
@@ -69,6 +182,38 @@ export type Database = {
             columns: ["ref"]
             isOneToOne: true
             referencedRelation: "summaries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      responses: {
+        Row: {
+          id: string
+          quiz_id: string
+          score: number
+          submitted_at: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          quiz_id: string
+          score?: number
+          submitted_at?: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          quiz_id?: string
+          score?: number
+          submitted_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "responses_quiz_id_fkey"
+            columns: ["quiz_id"]
+            isOneToOne: false
+            referencedRelation: "quizzes"
             referencedColumns: ["id"]
           },
         ]
@@ -114,9 +259,13 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      submit_quiz_response: {
+        Args: { p_option_ids: string[]; p_quiz_id: string; p_score: number }
+        Returns: string
+      }
     }
     Enums: {
+      question_type: "multiple_choice" | "true_or_false"
       quiz_status: "pending" | "success" | "error"
       summary_status: "pending" | "success" | "error"
     }
@@ -134,12 +283,12 @@ export type Tables<
   DefaultSchemaTableNameOrOptions extends
     | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
         DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -163,11 +312,11 @@ export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -188,11 +337,11 @@ export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -213,11 +362,11 @@ export type Enums<
   DefaultSchemaEnumNameOrOptions extends
     | keyof DefaultSchema["Enums"]
     | { schema: keyof DatabaseWithoutInternals },
-  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+  EnumName extends (DefaultSchemaEnumNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaEnumNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -230,11 +379,11 @@ export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
     | keyof DefaultSchema["CompositeTypes"]
     | { schema: keyof DatabaseWithoutInternals },
-  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+  CompositeTypeName extends (PublicCompositeTypeNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-    : never = never,
+    : never) = never,
 > = PublicCompositeTypeNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -244,8 +393,12 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
   public: {
     Enums: {
+      question_type: ["multiple_choice", "true_or_false"],
       quiz_status: ["pending", "success", "error"],
       summary_status: ["pending", "success", "error"],
     },

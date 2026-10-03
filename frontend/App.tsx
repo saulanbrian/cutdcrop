@@ -4,7 +4,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler"
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet"
 import RootNavigator from './src/navigation/RootNavigator'
 import Toast from "react-native-toast-message"
-import { toastConfig } from './src/toastConfig'
+import { toastConfig } from './src/toast-config'
 
 const queryClient = new QueryClient()
 

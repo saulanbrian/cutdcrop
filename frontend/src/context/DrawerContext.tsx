@@ -1,5 +1,4 @@
 import React, { createContext, useContext, useState } from "react"
-import { DrawerNavigationOptions } from "@react-navigation/drawer";
 
 type DrawerOptions = {
   swipeEnabled: boolean;

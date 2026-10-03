@@ -1,7 +1,7 @@
 import { NavigatorScreenParams } from "@react-navigation/native"
-import { SummaryStackParamList } from "./Summary/types"
-import { AuthStackParamList } from "./Auth/types";
-import { QuizStackParamList } from "./Quiz/types";
+import { SummaryStackParamList } from "./summary/types"
+import { AuthStackParamList } from "./auth/types";
+import { QuizStackParamList } from "./quiz/types";
 
 export type RootNavigatorParamList = {
   Summary: NavigatorScreenParams<SummaryStackParamList>;

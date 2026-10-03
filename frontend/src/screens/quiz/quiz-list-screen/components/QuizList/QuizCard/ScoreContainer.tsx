@@ -1,0 +1,51 @@
+import * as Progress from "react-native-progress"
+import { useCallback, useMemo } from "react";
+import { StyleSheet, useUnistyles } from "react-native-unistyles";
+import { ViewProps } from "react-native";
+import { useQuiz } from "@/src/context/quiz/QuizContext";
+
+
+export const ScoreContainer = (
+  { style }: { style?: ViewProps["style"] }
+) => {
+
+  const { colors } = useUnistyles().theme;
+  const { score, questionCount: numberOfQuestions } = useQuiz()
+
+  const scorePercentage = useMemo(() => {
+    const percentage = (score ?? 0) / numberOfQuestions;
+    return percentage;
+  }, [numberOfQuestions, score]);
+
+  const getColor = useCallback(() => {
+    if (scorePercentage >= 0.75) return colors.success;
+    if (scorePercentage >= 0.6) return colors.warning;
+    return colors.error;
+  }, [colors.error, colors.success, colors.warning, scorePercentage]);
+
+  const displayText = useCallback(() => {
+    return `${score ?? 0}/${numberOfQuestions}`;
+  }, [score, numberOfQuestions]);
+
+  return (
+    <Progress.Circle
+      progress={scorePercentage}
+      color={getColor()}
+      unfilledColor={colors.textSecondary}
+      thickness={5}
+      size={50}
+      showsText
+      borderWidth={0}
+      formatText={displayText}
+      textStyle={styles.scoreText}
+      style={style}
+    />
+  );
+};
+
+const styles = StyleSheet.create(theme => ({
+  scoreText: {
+    fontSize: theme.fontSize.xs,
+    color: theme.colors.textPrimary,
+  },
+}))

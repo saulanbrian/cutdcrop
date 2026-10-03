@@ -1,6 +1,6 @@
 import { StyleSheet } from 'react-native-unistyles'
 import { radii } from './src/constants/ui/radii'
-import { darkColors, lightColors } from './src/constants/ui/Colors'
+import { darkColors, lightColors } from './src/constants/ui/colors'
 import { spacing } from './src/constants/ui/spacing'
 import { fontSize } from './src/constants/ui/fonts'
 

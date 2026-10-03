@@ -1,31 +1,31 @@
-import { LoadingScreen, ThemedView, AppHeader, AppLogo, ThemedText } from "../components";
-import { getFocusedRouteNameFromRoute, NavigationContainer, NavigationProp, NavigationState, useFocusEffect, useNavigation } from "@react-navigation/native";
-import { createDrawerNavigator, DrawerNavigationOptions } from "@react-navigation/drawer"
-import SummaryStackNavigator from "./Summary";
-import AuthStackNavigator from "./Auth";
+import { LoadingScreen } from "@/src/components/ui";
+import { getFocusedRouteNameFromRoute, NavigationContainer } from "@react-navigation/native";
+import { createDrawerNavigator } from "@react-navigation/drawer"
+import SummaryStackNavigator from "./summary";
+import AuthStackNavigator from "./auth";
 import { linking } from "./linking";
 import { RootNavigatorParamList } from "./types";
-import { navigationRef } from "./navigationRef";
-import { StyleSheet, useUnistyles } from "react-native-unistyles";
-import { Dimensions, View } from "react-native";
-import { CustomDrawerContent } from "../components/Drawer";
-import { FontAwesome, Ionicons } from "@expo/vector-icons"
-import { useCallback, useEffect, useState } from "react";
+import { navigationRef } from "./navigation-ref";
+import { useUnistyles } from "react-native-unistyles";
+import { Dimensions } from "react-native";
+import { CustomDrawerContent } from "@/src/components/navigation";
+import { FontAwesome } from "@expo/vector-icons"
+import { useEffect, useState } from "react";
 import * as Fonts from "expo-font"
 import { QueryErrorResetBoundary } from "@tanstack/react-query"
 import { Session } from "@supabase/supabase-js";
 import { supabase } from "@/supabase/client"
-import QuizStackNavigator from "./Quiz";
-import DrawerContextProvider, { useDrawer } from "../context/DrawerContext";
+import QuizStackNavigator from "./quiz";
+import DrawerContextProvider, { useDrawer } from "@/src/context/DrawerContext";
 import * as SystemNavigationBar from "expo-navigation-bar"
-import { darkColors } from "../constants/ui/Colors";
+import { darkColors } from "@/src/constants/ui/colors";
 
 SystemNavigationBar.setVisibilityAsync("hidden")
 
 async function loadFonts() {
   try {
     await Fonts.loadAsync(FontAwesome.font)
-  } catch (e) {
+  } catch {
     return
   }
 }
@@ -40,7 +40,7 @@ export default function RootNavigator() {
 
       loadFonts()
 
-      const { data, error } = await supabase.auth.getSession()
+      const { data } = await supabase.auth.getSession()
       if (data) {
         setSession(data.session)
       } else {

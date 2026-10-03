@@ -1,0 +1,18 @@
+import { supabase } from "@/supabase/client";
+import { getUserIdAsync } from "./auth";
+
+export async function getProfile() {
+
+  const userId = await getUserIdAsync({ throwOnError: true })
+  if (!userId) throw new Error("No user logged In")
+
+  const { data, error: profileError } = await supabase
+    .from("profiles")
+    .select("*")
+    .eq("id", userId)
+    .single()
+
+  if (profileError) throw profileError
+
+  return data
+}
